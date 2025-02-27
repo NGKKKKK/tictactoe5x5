@@ -10,6 +10,8 @@ int main(int argc, char* argv[]) {
     IMG_Init(IMG_INIT_PNG | IMG_INIT_JPG);
     SDL_Window* window = SDL_CreateWindow(TILE, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, SCREEN_WIDTH, SCREEN_HEIGHT, SDL_WINDOW_SHOWN);
     SDL_Renderer* renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED);
+    SDL_Cursor* HandCursor = SDL_CreateSystemCursor(SDL_SYSTEM_CURSOR_HAND);
+    SDL_Cursor* ArrowCursor = SDL_CreateSystemCursor(SDL_SYSTEM_CURSOR_ARROW);
     SDL_Event event;
 
     SDL_Texture* Menu = IMG_LoadTexture(renderer, "Image/Menu.png");
@@ -30,7 +32,8 @@ int main(int argc, char* argv[]) {
     SDL_Rect ExitButton = { 450, 300, BUTTON_WIDTH, BUTTON_HEIGHT };
     SDL_Rect RetryButton = { 300, 300, BUTTON_WIDTH, BUTTON_HEIGHT };
 
-    int board[ROWS][COLS] = {};
+    int CursorX, CursorY;
+    int board[ROWS][COLS] = {0};
     int currentPlayer = 1; // 1 - X, 2 - O
     int type_of_over = 0; //0 - Draw, 1 - PlayerX, 2 - PlayerO
 
@@ -38,7 +41,13 @@ int main(int argc, char* argv[]) {
         while (SDL_PollEvent(&event)) {
             if (event.type == SDL_QUIT) game_running = false;
 
+            if (event.type == SDL_KEYDOWN && event.key.keysym.sym == SDLK_ESCAPE) STATE = MENU_STATE;
+
+            //Menu - Mở đầu
             if (STATE == MENU_STATE) {
+                SDL_GetMouseState(&CursorX, &CursorY);
+                if (ClickCheck(PlayButton, CursorX, CursorY) || ClickCheck(ExitButton, CursorX, CursorY)) SDL_SetCursor(HandCursor);
+                else SDL_SetCursor(ArrowCursor);
                 if (event.type == SDL_MOUSEBUTTONDOWN && event.button.button == SDL_BUTTON_LEFT) {
                     int x = event.button.x, y = event.button.y;
                     if (ClickCheck(PlayButton, x, y)) {
@@ -50,8 +59,12 @@ int main(int argc, char* argv[]) {
                         STATE = EXIT_STATE;
                         game_running = false;
                     }
+                    SDL_SetCursor(ArrowCursor);
                 }
-            } else if (STATE == PLAY_STATE) {
+            }
+
+            //Play - Trong trò chơi
+            else if (STATE == PLAY_STATE) {
                 if (event.type == SDL_MOUSEBUTTONDOWN && event.button.button == SDL_BUTTON_LEFT) {
                     int boardX = (SCREEN_WIDTH - CELL_SIZE * COLS) / 2;
                     int boardY = (SCREEN_HEIGHT - CELL_SIZE * ROWS) / 2;
@@ -73,14 +86,20 @@ int main(int argc, char* argv[]) {
                         }
                     }
                 }
-                if (event.type == SDL_KEYDOWN && event.key.keysym.sym == SDLK_ESCAPE) STATE = MENU_STATE;
-            } else if (STATE == GAME_OVER_STATE) {
+            }
+
+            //Over - Kết thúc game
+            else if (STATE == GAME_OVER_STATE) {
+                SDL_GetMouseState(&CursorX, &CursorY);
+                if (ClickCheck(RetryButton, CursorX, CursorY)) SDL_SetCursor(HandCursor);
+                else SDL_SetCursor(ArrowCursor);
                 if (event.type == SDL_MOUSEBUTTONDOWN && event.button.button == SDL_BUTTON_LEFT){
                     int x = event.button.x, y = event.button.y;
                     if (ClickCheck(RetryButton, x, y)){
                         STATE = PLAY_STATE;
                         ResetBoard(board);
                         currentPlayer = 1;
+                        SDL_SetCursor(ArrowCursor);
                     }
                 }
             }
