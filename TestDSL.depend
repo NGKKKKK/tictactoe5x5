@@ -1,0 +1,5 @@
+# depslib dependency file v1.0
+1738867663 source:c:\users\admin\onedrive\desktop\ltnc\testdsl\main.cpp
+	<iostream>
+	<SDL.h>
+
